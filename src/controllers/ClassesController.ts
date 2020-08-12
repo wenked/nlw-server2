@@ -1,6 +1,9 @@
 import db from '../database/connections';
 import convertHourToMinutes from '../utils/convertHourToMinutes';
 import { Request, Response, response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ScheudleItem {
 	week_day: number;
@@ -77,6 +80,81 @@ export default class ClassController {
 			console.log(err);
 			await trx.rollback();
 			return res.status(400).json({ error: 'Error while creating new class' });
+		}
+	}
+
+	async createAuthuser(req: Request, res: Response) {
+		const { name, lastname, email, password } = req.body;
+
+		const trx = await db.transaction();
+
+		try {
+			const hash = await bcrypt.hash(password, 10);
+			await trx('authusers').insert({
+				name,
+				lastname,
+				email,
+				password: hash,
+			});
+			await trx.commit();
+
+			return res.status(201).send({
+				name,
+				lastname,
+				email,
+			});
+		} catch (e) {
+			console.log(e);
+			await trx.rollback();
+			return res.status(500).send('something broke');
+		}
+	}
+
+	async login(req: Request, res: Response) {
+		const { email, password } = req.body;
+
+		try {
+			const user = await db('authusers').first('*').where({ email });
+			if (user) {
+				const validPass = await bcrypt.compare(password, user.password);
+				if (validPass) {
+					return res.status(200).json({
+						user: {
+							id: user.id,
+							name: user.name,
+							lastname: user.lastname,
+							email: user.email,
+						},
+						token: jwt.sign({ user: user.id }, 'secret', {
+							expiresIn: 86400,
+						}),
+					});
+				} else {
+					return res.json('errado');
+				}
+			} else {
+				return res.status(400).json('user not found');
+			}
+		} catch (e) {
+			console.log(e);
+			return res.status(500).send('Something broke');
+		}
+	}
+
+	async me(req: Request, res: Response) {
+		try {
+			const user = await db('authusers').first('*').where({ id: req.userId });
+			console.log(user);
+			return res.json({
+				user: {
+					id: user.id,
+					name: user.name,
+					lastname: user.lastname,
+					email: user.email,
+				},
+			});
+		} catch (e) {
+			return res.status(400).json({ error: 'cant get user authentication' });
 		}
 	}
 }
