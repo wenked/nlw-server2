@@ -1,6 +1,5 @@
-import { Request, Response, NextFunction, response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import db from '../database/connections';
 
 // interface authRequest extends Request {
 // 	auth: object | string;
@@ -29,18 +28,20 @@ export const authenticateToken = async (
 	const authHeader = req.headers.authorization;
 
 	if (!authHeader) {
-		return response.status(401).json({ message: 'Token is required' });
+		return res.status(401).json({ message: 'Token is required' });
 	}
 
 	const [, token] = authHeader.split(' ');
+	console.log(token, 'aqui');
 
 	try {
-		const payload = (await jwt.verify(token, 'secret')) as userPayload;
+		const payload = jwt.verify(token, 'secret') as userPayload;
 		req.userId = payload.user;
-		console.log(req.userId);
+		console.log(req.userId, 'auth aqui');
+
 		return next();
 	} catch (e) {
 		next(e);
-		return response.status(401).json({ message: 'Invalid token' });
+		return res.status(401).json({ message: 'Invalid token' });
 	}
 };

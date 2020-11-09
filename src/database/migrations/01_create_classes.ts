@@ -5,9 +5,8 @@ export async function up(knex: Knex) {
 		table.increments('id').primary();
 		table.string('subject').notNullable();
 		table.decimal('cost').notNullable();
-
 		table
-			.integer('user_id')
+			.integer('authuser_id')
 			.notNullable()
 			.references('id')
 			.inTable('users')

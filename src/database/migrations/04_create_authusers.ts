@@ -7,6 +7,10 @@ export async function up(knex: Knex) {
 		table.string('lastname').notNullable();
 		table.string('email').notNullable().unique();
 		table.string('password').notNullable();
+		table.string('avatar').notNullable();
+		table.string('whatsapp').notNullable();
+		table.string('bio').notNullable();
+		table.string('resetpasswordlink').defaultTo('');
 	});
 }
 

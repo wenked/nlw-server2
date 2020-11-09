@@ -17,12 +17,14 @@
 	"dependencies": {
 		"@types/bcryptjs": "^2.4.2",
 		"@types/jsonwebtoken": "^8.5.0",
+		"@types/mailgun-js": "^0.22.10",
 		"@types/uuid": "^8.0.1",
 		"bcryptjs": "^2.4.3",
 		"cors": "^2.8.5",
 		"express": "^4.17.1",
 		"jsonwebtoken": "^8.5.1",
 		"knex": "^0.21.2",
+		"mailgun-js": "^0.22.0",
 		"sqlite3": "^5.0.0",
 		"uuid": "^8.3.0"
 	}
